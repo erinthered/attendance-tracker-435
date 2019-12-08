@@ -5,3 +5,6 @@ models/*
 env
 *.sh
 test.py
+*.pyc
+.serverless/*
+.DS_Store

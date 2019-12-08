@@ -14,7 +14,7 @@ class User(db.Model, UserMixin):
     email = db.Column(db.String(100), nullable=False, unique=True)
     password_hash = db.Column(db.String(150), nullable=False, unique=True)
     user_type = db.Column(db.Enum('teacher', 'student'))
-    classes = db.relationship('Classes', backref='user', lazy=True)
+    classes = db.relationship('Classes', backref='users', lazy=True)
     enrollments = db.relationship('Enrollment', backref='users', lazy=True)
 
     def check_password(self, cleartext):
