@@ -1,8 +1,10 @@
 from forms import LoginForm, RegistrationForm
-from models import db, login_manager, login_required, User
+from models import db, login_manager, login_required, User, Classes
 from flask import Blueprint, flash, get_flashed_messages, redirect, render_template, request, url_for
 from flask_login import current_user, login_user, logout_user
 from werkzeug.security import check_password_hash, generate_password_hash
+import random
+import string
 
 # Blueprint that will register 'auth' or authentication routes
 # Routes that will require user authentication or depend on
@@ -85,7 +87,43 @@ def student_dashboard():
 
 # The route for teacher dashboard
 # See logic/models.py for more infor on @login_required decorator
-@auth.route('/teacher_dashboard')
+@auth.route('/teacher_dashboard', methods=['POST', 'GET'])
 @login_required(role='teacher')
 def teacher_dashboard():
-    return render_template('base_dashboard.html', title='Teacher Dashboard')
+    #class_list = Classes.query.filter_by(professor_id=current_user.user_id)
+    # print(class_list)
+    class_list = []
+
+    if request.method == 'POST':
+        # if add_class is clicked
+        # get class name and section, generate registration code, and add a new class to database, redirect
+        if 'add_class' in request.form:
+            # generate random registration code
+            registration_code = ""
+            for i in range(50):
+                registration_code += (random.choice(string.ascii_letters))
+
+            # add class to database
+            new_class = Classes(
+                name=request.form['class_name'],
+                section=request.form['class_section'],
+                enrollment_code=registration_code,
+                professor_id=current_user.user_id
+            )
+            print(new_class)
+            db.session.add(new_class)
+            db.session.commit()
+
+            class_id = Classes.query.add_columns(Classes.class_id).filter_by(
+                professor_id=current_user.user_id, name=new_class.name, section=new_class.section)
+            return redirect(url_for('auth.class_page', id=class_id))
+        # else:
+            # return redirect(url_for('auth.class', id=class_id))
+    return render_template('teacher_dashboard.html', title='Teacher Dashboard', class_list=class_list)
+
+# Route for teacher metrics and information for an individual clas
+@auth.route('/class_page/<id>', methods=['GET', 'POST'])
+@login_required(role='teacher')
+def class_page(id):
+
+    return render_template('index.html')

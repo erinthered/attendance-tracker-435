@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block body %}
+    <h1 class="title">Welcome, {{ current_user.name  }}</h1>
+    <h3 class="title">You are a {{ current_user.user_type }}</h3>
+
+    </h1>
+    <form method="POST" action="{{ url_for('auth.teacher_dashboard') }}">
+        Class name:<br>
+        <input type="text" name="class_name"><br>
+        Section:<br>
+        <input type="text" name="class_section"><br><br>
+        <input type="submit" name="add_class" value="Submit" />
+    </form>
+    <h1>
+{% endblock body %}
