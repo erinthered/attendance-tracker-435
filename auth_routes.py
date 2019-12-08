@@ -5,7 +5,7 @@ from flask_login import current_user, login_user, logout_user
 from werkzeug.security import check_password_hash, generate_password_hash
 
 # Blueprint that will register 'auth' or authentication routes
-# Routes that will require user authentication or depend on 
+# Routes that will require user authentication or depend on
 # user authentication
 auth = Blueprint('auth', __name__, template_folder='templates')
 
@@ -29,7 +29,7 @@ def login():
                 return redirect(url_for('auth.login'))
 
             login_user(user)
-            
+
             if user.user_type == 'student':
                 return redirect(url_for('auth.student_dashboard'))
             elif user.user_type == 'teacher':
@@ -44,11 +44,12 @@ def register():
 
     if request.method == 'POST':
         if form.validate_on_submit():
-            # Query database for existing user if this query returns a user then 
-            # let the user know an account with that email exists and give them 
+            # Query database for existing user if this query returns a user then
+            # let the user know an account with that email exists and give them
             # the option to login
             # Otherwise create a user and store them in the database.
-            user_exists = User.query.filter(User.email == form.email.data).first()            
+            user_exists = User.query.filter(
+                User.email == form.email.data).first()
 
             if user_exists:
                 flash('A user with that email already exists', category='failure')
@@ -59,13 +60,13 @@ def register():
                             email=form.email.data,
                             password_hash=hashed_pass,
                             user_type=request.form['user_type'])
-            
+
             db.session.add(new_user)
             db.session.commit()
 
             flash('User account created successfully!', category='success')
             return redirect(url_for('auth.login'))
-       
+
     return render_template('register.html', form=form, title='Register')
 
 # Handles the logout of users

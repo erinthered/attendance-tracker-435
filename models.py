@@ -14,8 +14,8 @@ class User(db.Model, UserMixin):
     email = db.Column(db.String(100), nullable=False, unique=True)
     password_hash = db.Column(db.String(150), nullable=False, unique=True)
     user_type = db.Column(db.Enum('teacher', 'student'))
-    classes = db.relationship('Classes', backref='users', lazy=True)
-    enrollments = db.relationship('Enrollment', backref='users', lazy=True)
+    #classes = db.relationship('Classes', backref='users', lazy=True)
+    #enrollments = db.relationship('Enrollment', backref='users', lazy=True)
 
     def check_password(self, cleartext):
         if check_password_hash(self.password_hash, cleartext):
@@ -64,8 +64,8 @@ class Classes(db.Model):
     attendance_code = db.Column(db.String(50), nullable=True)
     enrollment_code = db.Column(db.String(50), nullable=False)
     professor_id = db.Column(db.Integer, db.ForeignKey(
-        'users.user_id'), nullable=False)
-    enrollments = db.relationship('Enrollment', backref='classes', lazy=True)
+        'Users.user_id'), nullable=False)
+    #enrollments = db.relationship('Enrollment', backref='classes', lazy=True)
 
     def get_id(self):
         return self.class_id
@@ -75,9 +75,9 @@ class Enrollment(db.Model):
     """Flask SQLAlchemy class representing Enrollment table in database"""
     __tablename__ = 'Enrollment'
     class_id = db.Column(db.Integer, db.ForeignKey(
-        'classes.class_id'), nullable=False, primary_key=True)
+        'Classes.class_id'), nullable=False, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey(
-        'users.user_id'), nullable=False, primary_key=True)
+        'Users.user_id'), nullable=False, primary_key=True)
     dropped = db.Column(db.Boolean, nullable=False)
 
     def get_id(self):
@@ -88,9 +88,9 @@ class Attendance(db.Model):
     """Flask SQLAlchemy class representing Enrollment table in database"""
     __tablename__ = 'Attendance'
     class_id = db.Column(db.Integer, db.ForeignKey(
-        'classes.class_id'), nullable=False, primary_key=True)
+        'Classes.class_id'), nullable=False, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey(
-        'users.user_id'), nullable=False, primary_key=True)
+        'Users.user_id'), nullable=False, primary_key=True)
     date = db.Column(db.Date, nullable=False, primary_key=True)
 
     def get_id(self):
