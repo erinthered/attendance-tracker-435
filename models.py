@@ -91,7 +91,7 @@ class Attendance(db.Model):
         'classes.class_id'), nullable=False, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey(
         'users.user_id'), nullable=False, primary_key=True)
-    date = db.Column(db.Date, primary_key=True)
+    date = db.Column(db.Date, nullable=False, primary_key=True)
 
     def get_id(self):
         return self.class_id + self.user_id

@@ -19,8 +19,8 @@ CREATE TABLE Classes (
 );
 
 CREATE TABLE Enrollment (
-    class_id INT,
-    user_id INT,
+    class_id INT NOT NULL,
+    user_id INT NOT NULL,
     dropped BOOLEAN DEFAULT false,
     PRIMARY KEY(class_id, user_id),
     FOREIGN KEY(class_id) REFERENCES Classes(class_id) ON DELETE CASCADE,
@@ -28,10 +28,10 @@ CREATE TABLE Enrollment (
 );
 
 CREATE TABLE Attendance (
-  class_id INT,
-  user_id INT,
-  date DATE,
-  PRIMARY KEY(class_id, user_id),
+  class_id INT NOT NULL,
+  user_id INT NOT NULL,
+  date DATE NOT NULL,
+  PRIMARY KEY(class_id, user_id, date),
   FOREIGN KEY(class_id) REFERENCES Enrollment(class_id) ON DELETE CASCADE,
   FOREIGN KEY(user_id) REFERENCES Enrollment(user_id)
 );
