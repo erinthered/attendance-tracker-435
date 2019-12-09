@@ -1,5 +1,5 @@
 from forms import LoginForm, RegistrationForm
-from models import db, login_manager, login_required, User, Classes, Enrollment
+from models import db, login_manager, login_required, User, Classes, Enrollment, Attendance
 from flask import Blueprint, flash, get_flashed_messages, redirect, render_template, request, url_for
 from flask_login import current_user, login_user, logout_user
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -185,6 +185,22 @@ def teacher_class_page(id):
 @auth.route('/student_class_page/<id>', methods=['GET', 'POST'])
 @login_required(role='student')
 def student_class_page(id):
+        #query classes and get class info
+    current_class = Classes.query.filter_by(class_id=id).first()
+    if request.method=="POST":
+        Enrollment.query.filter_by(class_id=id, user_id=current_user.user_id).delete()
+        db.session.commit()
+
+        #attendance_code = request.form['attendance_code']
+        #attendance_code = "KUHQQpDvobkqAkDZIKFmVHbKjzyPYakptBZSjTWyKVcRgHkJqb"
+        # Add a new attendance to the Attendance table
+        # new_attendance = Attendance(
+        #     class_id=id,
+        #     user_id=current_user.user_id,
+        # )
+        # db.session.add(new_attendance)
+        # db.session.commit()
+        return redirect(url_for('auth.student_class_page', id=id))
     # query classes and get class info
     current_class = Classes.query.filter_by(class_id=id).first()
     return render_template('student_class_page.html', current_class=current_class)

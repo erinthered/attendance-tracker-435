@@ -32,8 +32,8 @@ CREATE TABLE Attendance (
   user_id INT NOT NULL,
   date DATE NOT NULL,
   PRIMARY KEY(class_id, user_id, date),
-  FOREIGN KEY(class_id) REFERENCES Enrollment(class_id) ON DELETE CASCADE,
-  FOREIGN KEY(user_id) REFERENCES Enrollment(user_id)
+  FOREIGN KEY(class_id) REFERENCES Classes(class_id) ON DELETE CASCADE,
+  FOREIGN KEY(user_id) REFERENCES Users(user_id)
 );
 
 

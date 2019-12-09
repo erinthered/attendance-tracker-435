@@ -9,10 +9,7 @@ Section:<br />
   <input type="text" name="attendance_code" /><br /><br />
   <input type="submit" name="attend_class" value="Attend Class" />
 </form>
-<form
-  type="POST"
-  action="{{ url_for('auth.student_class_page', id=current_class.class_id) }}"
->
-  <input type="submit" name="unenroll_class" value="Unenroll from Class" />
+<form type="POST" action="{{ url_for('auth.student_dashboard') }}">
+  <input type="submit" name="unenroll" value="Unenroll from Class" />
 </form>
 {% endblock body %}

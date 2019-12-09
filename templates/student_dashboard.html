@@ -5,7 +5,7 @@
     <h2>Current Classes:</h2>
     {% for class in class_names %}
     <form method="POST" action="{{ url_for('auth.student_class_page', id=class[0]) }}">    
-        <button>{{class[1]}}</button>
+        <button>{{class}}</button>
     </form>
     {% endfor %}
     </h1>
