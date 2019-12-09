@@ -80,7 +80,7 @@ def logout():
 
 # The route for student dashboard
 # See logic/models.py for more infor on @login_required decorator
-@auth.route('/student_dashboard')
+@auth.route('/student_dashboard', methods=['POST', 'GET'])
 @login_required(role='student')
 def student_dashboard():
     enrollment_obj = Enrollment.query.filter_by(user_id=current_user.user_id)
@@ -95,6 +95,21 @@ def student_dashboard():
         for c in class_obj:
             class_info = c.get_name()
             class_names.append(class_info)
+    if request.method == 'POST':
+        enrollment_code = request.form['enrollment_code']
+        # Add a new enrollment to the Enrollment table
+        class_id = Classes.query.filter_by(
+            enrollment_code=enrollment_code).first().get_id()
+        new_enrollment = Enrollment(
+            class_id=class_id,
+            user_id=current_user.user_id,
+            dropped=False
+        )
+        db.session.add(new_enrollment)
+        db.session.commit()
+        flash('Registration Successful!', category='success')
+        return redirect(url_for('auth.student_class_page', id=class_id))
+
     return render_template('student_dashboard.html', title='Student Dashboard', class_names=class_names)
 
 # The route for teacher dashboard
@@ -110,14 +125,13 @@ def teacher_dashboard():
         class_info = (c.get_id(), c.get_name(), c.get_section())
         class_list.append(class_info)
 
-    # print(class_list)
-
     if request.method == 'POST':
         # if add_class is clicked
         # get class name and section, generate registration code, and add a new class to database, redirect
         if 'add_class' in request.form:
             # generate random registration code
             registration_code = get_code()
+            registration_code = check_
 
             # add class to database
             new_class = Classes(
@@ -132,10 +146,10 @@ def teacher_dashboard():
             class_added = Classes.query.filter_by(
                 professor_id=current_user.user_id, name=new_class.name, section=new_class.section).first()
             class_id = class_added.get_id()
-            return redirect(url_for('auth.class_page', id=class_id))
+            return redirect(url_for('auth.teacher_class_page', id=class_id))
         else:
             class_id = request.form[class_id]
-            return redirect(url_for('auth.class', id=class_id))
+            return redirect(url_for('auth.teacher_class_page', id=class_id))
     return render_template('teacher_dashboard.html', title='Teacher Dashboard', class_list=class_list)
 
 # Route for teacher metrics and information for an individual clas
@@ -167,10 +181,13 @@ def teacher_class_page(id):
 
     return render_template('teacher_class_page.html', current_class=current_class, registration_code=registration_code, attendance_code=attendance_code)
 
+
 @auth.route('/student_class_page/<id>', methods=['GET', 'POST'])
-@login_required(role='teacher')
+@login_required(role='student')
 def student_class_page(id):
-    return render_template('student_class_page.html')
+    # query classes and get class info
+    current_class = Classes.query.filter_by(class_id=id).first()
+    return render_template('student_class_page.html', current_class=current_class)
 
 
 # generate random registration or attendance code: helper_code
@@ -178,14 +195,21 @@ def get_code():
     code = ""
     for i in range(50):
         code += (random.choice(string.ascii_letters))
+    code = check_unique_code(code)
     return code
 
 # check for unique registration code when generating
 
 
 def check_unique_code(code):
-    duplicate = Classes.query.filter_by(registration_code=code).first()
+    duplicate = Classes.query.filter_by(enrollment_code=code).first()
     while duplicate:
-        new_code = get_code()
-        duplicate = Classes.query.filter_by(registration_code=new_code).first()
-    return new_code
+        code = get_code()
+        duplicate = Classes.query.filter_by(enrollment_code=new_code).first()
+    return code
+
+
+def validate_registration(code):
+    valid_class = Classes.query.filter_by(enrollment_code=code).first()
+    if not valid_class:
+        return None

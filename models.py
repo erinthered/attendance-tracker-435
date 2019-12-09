@@ -90,7 +90,7 @@ class Enrollment(db.Model):
         'Classes.class_id'), nullable=False, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey(
         'Users.user_id'), nullable=False, primary_key=True)
-    dropped = db.Column(db.Boolean, nullable=False)
+    dropped = db.Column(db.Boolean, nullable=False, default=False)
 
     def get_class_id(self):
         return self.class_id

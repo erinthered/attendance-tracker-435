@@ -1,0 +1,18 @@
+{% extends "base.html" %} {% block body %}
+<h1 class="title">Welcome {{ current_user.name }}</h1>
+<p>Class Page For {{current_class.name}}</p>
+Section:<br />
+<form
+  type="POST"
+  action="{{ url_for('auth.student_class_page', id=current_class.class_id) }}"
+>
+  <input type="text" name="attendance_code" /><br /><br />
+  <input type="submit" name="attend_class" value="Attend Class" />
+</form>
+<form
+  type="POST"
+  action="{{ url_for('auth.student_class_page', id=current_class.class_id) }}"
+>
+  <input type="submit" name="unenroll_class" value="Unenroll from Class" />
+</form>
+{% endblock body %}
