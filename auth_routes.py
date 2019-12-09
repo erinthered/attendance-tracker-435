@@ -105,9 +105,7 @@ def teacher_dashboard():
         # get class name and section, generate registration code, and add a new class to database, redirect
         if 'add_class' in request.form:
             # generate random registration code
-            registration_code = ""
-            for i in range(50):
-                registration_code += (random.choice(string.ascii_letters))
+            registration_code = get_code()
 
             # add class to database
             new_class = Classes(
@@ -123,13 +121,40 @@ def teacher_dashboard():
                 professor_id=current_user.user_id, name=new_class.name, section=new_class.section).first()
             class_id = class_added.get_id()
             return redirect(url_for('auth.class_page', id=class_id))
-        # else:
-            # return redirect(url_for('auth.class', id=class_id))
+        else:
+            class_id = request.form[class_id]
+            return redirect(url_for('auth.class', id=class_id))
     return render_template('teacher_dashboard.html', title='Teacher Dashboard', class_list=class_list)
 
 # Route for teacher metrics and information for an individual clas
-@auth.route('/class_page', methods=['GET', 'POST'])
+@auth.route('/class_page/<id>', methods=['GET', 'POST'])
 @login_required(role='teacher')
 def class_page(id):
+    # Get current class info
+    current_class = Classes.query.filter_by(class_id=id).first()
+    # Get registration code to display in template
+    registration_code = current_class.get_enrollment_code()
+    attendance_code = None
 
-    return render_template('index.html')
+    if request.method == 'POST':
+        # Generate attendance code button pressed
+        if 'gen_code' in request.form:
+            if current_class.get_attendance_code():
+                # there is already an attendance code, delete it
+                current_class.attendance_code = None
+                db.session.commit()
+            else:
+                # there is no code, generate it
+                attendance_code = get_code()
+                current_class.attendance_code = attendance_code
+                db.session.commit()
+
+    return render_template('class_page.html', current_class=current_class, registration_code=registration_code, attendance_code=attendance_code)
+
+
+# generate random registration or attendance code: helper_code
+def get_code():
+    code = ""
+    for i in range(50):
+        code += (random.choice(string.ascii_letters))
+    return code

@@ -1,0 +1,32 @@
+{% extends "base.html" %} {% block body %}
+<h1 class="title">Welcome Teacher, {{ current_user.name }}</h1>
+<p>Class Page For {{current_class.name}}</p>
+<table style="width:100%">
+  <tr>
+    <th>Student Name</th>
+    <th>Attendance Percentage</th>
+  </tr>
+  <tr>
+    {% for student in attendance_records %}
+    <td>{{student[0]}}</td>
+    <td>{{student[1]}}</td>
+    {% endfor %}
+  </tr>
+</table>
+
+<br />
+<p>Registration Code: {{registration_code}}</p>
+<form
+  method="POST"
+  action="{{ url_for('auth.class_page', id=current_class.class_id) }}"
+>
+  {% if attendance_code %}
+  <p>Attendance Code: {{attendance_code}}</p>
+  <input type="submit" name="gen_code" value="Expire Current Attendance Code" />
+  {% else %}
+  <p>No current attendance code.</p>
+  <input type="submit" name="gen_code" value="Generate Attendance Code" />
+  {% endif %}
+</form>
+
+{% endblock body %}

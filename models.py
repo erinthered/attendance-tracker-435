@@ -76,6 +76,12 @@ class Classes(db.Model):
     def get_section(self):
         return self.section
 
+    def get_enrollment_code(self):
+        return self.enrollment_code
+
+    def get_attendance_code(self):
+        return self.attendance_code
+
 
 class Enrollment(db.Model):
     """Flask SQLAlchemy class representing Enrollment table in database"""
@@ -97,7 +103,8 @@ class Attendance(db.Model):
         'Classes.class_id'), nullable=False, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey(
         'Users.user_id'), nullable=False, primary_key=True)
-    date = db.Column(db.Date, nullable=False, primary_key=True)
+    date = db.Column(db.Date, default=db.func.now(),
+                     nullable=False, primary_key=True)
 
     def get_id(self):
         return self.class_id + self.user_id
