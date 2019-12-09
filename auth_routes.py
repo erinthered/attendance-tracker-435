@@ -160,6 +160,10 @@ def teacher_class_page(id):
                 attendance_code = get_code()
                 current_class.attendance_code = attendance_code
                 db.session.commit()
+        if 'del_class' in request.form:
+            db.session.delete(current_class)
+            db.session.commit()
+            return redirect(url_for('auth.teacher_dashboard'))
 
     return render_template('teacher_class_page.html', current_class=current_class, registration_code=registration_code, attendance_code=attendance_code)
 
