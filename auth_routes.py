@@ -90,9 +90,15 @@ def student_dashboard():
 @auth.route('/teacher_dashboard', methods=['POST', 'GET'])
 @login_required(role='teacher')
 def teacher_dashboard():
-    #class_list = Classes.query.filter_by(professor_id=current_user.user_id)
-    # print(class_list)
+    class_obj = Classes.query.filter_by(
+        professor_id=current_user.user_id)
+
     class_list = []
+    for c in class_obj:
+        class_info = (c.get_id(), c.get_name(), c.get_section())
+        class_list.append(class_info)
+
+    # print(class_list)
 
     if request.method == 'POST':
         # if add_class is clicked
@@ -110,19 +116,19 @@ def teacher_dashboard():
                 enrollment_code=registration_code,
                 professor_id=current_user.user_id
             )
-            print(new_class)
             db.session.add(new_class)
             db.session.commit()
 
-            class_id = Classes.query.add_columns(Classes.class_id).filter_by(
-                professor_id=current_user.user_id, name=new_class.name, section=new_class.section)
+            class_added = Classes.query.filter_by(
+                professor_id=current_user.user_id, name=new_class.name, section=new_class.section).first()
+            class_id = class_added.get_id()
             return redirect(url_for('auth.class_page', id=class_id))
         # else:
             # return redirect(url_for('auth.class', id=class_id))
     return render_template('teacher_dashboard.html', title='Teacher Dashboard', class_list=class_list)
 
 # Route for teacher metrics and information for an individual clas
-@auth.route('/class_page/<id>', methods=['GET', 'POST'])
+@auth.route('/class_page', methods=['GET', 'POST'])
 @login_required(role='teacher')
 def class_page(id):
 

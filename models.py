@@ -70,6 +70,12 @@ class Classes(db.Model):
     def get_id(self):
         return self.class_id
 
+    def get_name(self):
+        return self.name
+
+    def get_section(self):
+        return self.section
+
 
 class Enrollment(db.Model):
     """Flask SQLAlchemy class representing Enrollment table in database"""

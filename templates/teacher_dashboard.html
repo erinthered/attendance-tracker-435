@@ -5,11 +5,12 @@
 
     </h1>
     <form method="POST" action="{{ url_for('auth.teacher_dashboard') }}">
+        Add a Class:<br>
         Class name:<br>
         <input type="text" name="class_name"><br>
         Section:<br>
         <input type="text" name="class_section"><br><br>
-        <input type="submit" name="add_class" value="Submit" />
+        <input type="submit" name="add_class" value="Add Class" />
     </form>
     <h1>
 {% endblock body %}
