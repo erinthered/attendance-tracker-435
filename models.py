@@ -92,8 +92,11 @@ class Enrollment(db.Model):
         'Users.user_id'), nullable=False, primary_key=True)
     dropped = db.Column(db.Boolean, nullable=False)
 
-    def get_id(self):
-        return self.class_id + self.user_id
+    def get_class_id(self):
+        return self.class_id
+
+    def get_user_id(self):
+        return self.user_id
 
 
 class Attendance(db.Model):

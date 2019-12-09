@@ -1,5 +1,5 @@
 from forms import LoginForm, RegistrationForm
-from models import db, login_manager, login_required, User, Classes
+from models import db, login_manager, login_required, User, Classes, Enrollment
 from flask import Blueprint, flash, get_flashed_messages, redirect, render_template, request, url_for
 from flask_login import current_user, login_user, logout_user
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -83,7 +83,19 @@ def logout():
 @auth.route('/student_dashboard')
 @login_required(role='student')
 def student_dashboard():
-    return render_template('base_dashboard.html', title='Student Dashboard')
+    enrollment_obj = Enrollment.query.filter_by(user_id=current_user.user_id)
+    class_ids = []
+    class_objs = []
+    class_names = []
+    for e in enrollment_obj:
+        id = (e.get_class_id())
+        class_ids.append(id)
+    for c in class_ids:
+        class_obj = Classes.query.filter_by(class_id=c)
+        for c in class_obj:
+            class_info = c.get_name()
+            class_names.append(class_info)
+    return render_template('student_dashboard.html', title='Student Dashboard', class_names=class_names)
 
 # The route for teacher dashboard
 # See logic/models.py for more infor on @login_required decorator
@@ -158,3 +170,13 @@ def get_code():
     for i in range(50):
         code += (random.choice(string.ascii_letters))
     return code
+
+# check for unique registration code when generating
+
+
+def check_unique_code(code):
+    duplicate = Classes.query.filter_by(registration_code=code).first()
+    while duplicate:
+        new_code = get_code()
+        duplicate = Classes.query.filter_by(registration_code=new_code).first()
+    return new_code
