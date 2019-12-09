@@ -139,9 +139,9 @@ def teacher_dashboard():
     return render_template('teacher_dashboard.html', title='Teacher Dashboard', class_list=class_list)
 
 # Route for teacher metrics and information for an individual clas
-@auth.route('/class_page/<id>', methods=['GET', 'POST'])
+@auth.route('/teacher_class_page/<id>', methods=['GET', 'POST'])
 @login_required(role='teacher')
-def class_page(id):
+def teacher_class_page(id):
     # Get current class info
     current_class = Classes.query.filter_by(class_id=id).first()
     # Get registration code to display in template
@@ -161,7 +161,12 @@ def class_page(id):
                 current_class.attendance_code = attendance_code
                 db.session.commit()
 
-    return render_template('class_page.html', current_class=current_class, registration_code=registration_code, attendance_code=attendance_code)
+    return render_template('teacher_class_page.html', current_class=current_class, registration_code=registration_code, attendance_code=attendance_code)
+
+@auth.route('/student_class_page/<id>', methods=['GET', 'POST'])
+@login_required(role='teacher')
+def student_class_page(id):
+    return render_template('student_class_page.html')
 
 
 # generate random registration or attendance code: helper_code
