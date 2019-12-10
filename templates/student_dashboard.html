@@ -3,11 +3,16 @@
     <h1 class="title">Welcome, {{ current_user.name  }}</h1>
     <h3 class="title">You are a {{ current_user.user_type }}</h3>
     <h2>Current Classes:</h2>
-    {% for class in class_names %}
-    <form method="POST" action="{{ url_for('auth.student_class_page', id=class[0]) }}">    
-        <button>{{class}}</button>
-    </form>
-    {% endfor %}
+    <ul>
+        {% for class in classes %}
+            <li>
+                <a href="{{ url_for('auth.student_class_page', id=class.get_id()) }}">
+                    <button>{{class.get_name()}}</button>
+                </a>
+            </li>
+        {% endfor %}
+    </ul>
+    
     </h1>
     <form method="POST" action="{{ url_for('auth.student_dashboard') }}">
         Enrollment Code:<br>

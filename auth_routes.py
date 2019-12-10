@@ -1,10 +1,11 @@
 from forms import LoginForm, RegistrationForm
 from models import db, login_manager, login_required, User, Classes, Enrollment, Attendance
-from flask import Blueprint, flash, get_flashed_messages, redirect, render_template, request, url_for
+from flask import Blueprint, flash, get_flashed_messages, redirect, render_template, request, url_for, jsonify
 from flask_login import current_user, login_user, logout_user
 from werkzeug.security import check_password_hash, generate_password_hash
 import random
 import string
+import datetime
 
 # Blueprint that will register 'auth' or authentication routes
 # Routes that will require user authentication or depend on
@@ -83,18 +84,9 @@ def logout():
 @auth.route('/student_dashboard', methods=['POST', 'GET'])
 @login_required(role='student')
 def student_dashboard():
-    enrollment_obj = Enrollment.query.filter_by(user_id=current_user.user_id)
-    class_ids = []
-    class_objs = []
-    class_names = []
-    for e in enrollment_obj:
-        id = (e.get_class_id())
-        class_ids.append(id)
-    for c in class_ids:
-        class_obj = Classes.query.filter_by(class_id=c)
-        for c in class_obj:
-            class_info = c.get_name()
-            class_names.append(class_info)
+    enrollment_obj = Enrollment.query.filter_by(user_id=current_user.user_id).all()
+    classes = [Classes.query.get(enroll.get_class_id()) 
+               for enroll in enrollment_obj]
     if request.method == 'POST':
         enrollment_code = request.form['enrollment_code']
         # Add a new enrollment to the Enrollment table
@@ -110,7 +102,7 @@ def student_dashboard():
         flash('Registration Successful!', category='success')
         return redirect(url_for('auth.student_class_page', id=class_id))
 
-    return render_template('student_dashboard.html', title='Student Dashboard', class_names=class_names)
+    return render_template('student_dashboard.html', title='Student Dashboard', classes=classes)
 
 # The route for teacher dashboard
 # See logic/models.py for more infor on @login_required decorator
@@ -131,7 +123,6 @@ def teacher_dashboard():
         if 'add_class' in request.form:
             # generate random registration code
             registration_code = get_code()
-            registration_code = check_
 
             # add class to database
             new_class = Classes(
@@ -185,26 +176,64 @@ def teacher_class_page(id):
 @auth.route('/student_class_page/<id>', methods=['GET', 'POST'])
 @login_required(role='student')
 def student_class_page(id):
-        #query classes and get class info
+    #query classes and get class info
     current_class = Classes.query.filter_by(class_id=id).first()
-    if request.method=="POST":
+    if request.method=="POST": 
+    #     if 'enrollment_code' in request.form:
+    #         #attendance_code = request.form['enrollment_code']
+    #         attendance_code = "RcgesoTWuRKMvHajYgqIjlZnYbThBDgrrRweSvwXWnlNSVAKHA"
+    #         # Add a new attendance to the Attendance table
+            # new_attendance = Attendance(
+            #     class_id=id,
+            #     user_id=current_user.user_id,
+            #     date=date.today()
+            # )
+            # db.session.add(new_attendance)
+            # db.session.commit()
+    #         return redirect(url_for('auth.student_class_page', id=id))
+    #     else:
+        # Unenroll from a class
         Enrollment.query.filter_by(class_id=id, user_id=current_user.user_id).delete()
         db.session.commit()
-
-        #attendance_code = request.form['attendance_code']
-        #attendance_code = "KUHQQpDvobkqAkDZIKFmVHbKjzyPYakptBZSjTWyKVcRgHkJqb"
-        # Add a new attendance to the Attendance table
-        # new_attendance = Attendance(
-        #     class_id=id,
-        #     user_id=current_user.user_id,
-        # )
-        # db.session.add(new_attendance)
-        # db.session.commit()
-        return redirect(url_for('auth.student_class_page', id=id))
-    # query classes and get class info
-    current_class = Classes.query.filter_by(class_id=id).first()
+        return redirect(url_for('auth.student_dashboard'))
     return render_template('student_class_page.html', current_class=current_class)
 
+@auth.route('/mark_attendance/<id>', methods=['GET'])
+@login_required(role='student')
+def mark_attendance(id):
+    class_id, user_id, date = id, current_user.user_id, datetime.date.today()
+    response = {
+        'class_id': class_id,
+        'user_id': user_id,
+        'date': date,
+        'already_marked': False
+    }
+    
+    def is_enrolled():
+        enroll = Enrollment.query.filter_by(user_id=user_id, class_id=id, dropped=False).all()
+        if enroll:
+            return True
+        return False
+    if not is_enrolled():
+        response['success'] = False
+        return jsonify(response)
+        
+    if not Attendance.query.filter_by(
+        class_id=class_id, user_id=user_id, date=date).all():
+        
+        new_attendance = Attendance(
+            class_id=id,
+            user_id=current_user.user_id,
+            date=datetime.date.today()
+        )
+        db.session.add(new_attendance)
+        db.session.commit()
+        response['success'] = True
+    else:
+        response['success'] = True
+        response['already_marked'] = True
+    return jsonify(response)
+        
 
 # generate random registration or attendance code: helper_code
 def get_code():

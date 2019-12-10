@@ -28,6 +28,13 @@ class User(db.Model, UserMixin):
 
     def get_user_type(self):
         return self.user_type
+    
+    def __repr__(self):
+        return "(ID {user_id}) {user_type} | {name}".format(
+            user_id=self.user_id, 
+            name=self.name,
+            user_type=self.user_type
+        )
 
 # function responsible for handling the user during the current
 # session. Handles the logging in and out of users
@@ -81,7 +88,12 @@ class Classes(db.Model):
 
     def get_attendance_code(self):
         return self.attendance_code
-
+    
+    def __repr__(self):
+        return "(ID {user_id}) {name}".format(
+            user_id=self.class_id, 
+            name=self.name
+        )
 
 class Enrollment(db.Model):
     """Flask SQLAlchemy class representing Enrollment table in database"""
@@ -97,10 +109,18 @@ class Enrollment(db.Model):
 
     def get_user_id(self):
         return self.user_id
+    
+    def __repr__(self):
+        linked_class = Classes.query.get(self.class_id)
+        student = User.query.get(self.user_id)
+        return "Class: {linked_class} | Student: {student}".format(
+            linked_class=linked_class, 
+            student=student
+        )
 
 
 class Attendance(db.Model):
-    """Flask SQLAlchemy class representing Enrollment table in database"""
+    """Flask SQLAlchemy class representing Attendance table in database"""
     __tablename__ = 'Attendance'
     class_id = db.Column(db.Integer, db.ForeignKey(
         'Classes.class_id'), nullable=False, primary_key=True)
@@ -110,4 +130,13 @@ class Attendance(db.Model):
                      nullable=False, primary_key=True)
 
     def get_id(self):
-        return self.class_id + self.user_id
+        return self.class_id + self.user_id + self.date
+    
+    def __repr__(self):
+        linked_class = Classes.query.get(self.class_id)
+        student = User.query.get(self.user_id)
+        return "Class: {linked_class} | Student: {student} | Date: {date}".format(
+            linked_class=linked_class, 
+            student=student,
+            date = self.date
+        )

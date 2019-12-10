@@ -7,9 +7,41 @@ Section:<br />
   action="{{ url_for('auth.student_class_page', id=current_class.class_id) }}"
 >
   <input type="text" name="attendance_code" /><br /><br />
-  <input type="submit" name="attend_class" value="Attend Class" />
 </form>
+<!-- <form type="GET" action="{{ url_for('auth.mark_attendance', id=current_class.class_id) }}"> -->
+  <button id="attend_class">Attend Class</button>
+<!-- </form> -->
 <form type="POST" action="{{ url_for('auth.student_dashboard') }}">
   <input type="submit" name="unenroll" value="Unenroll from Class" />
 </form>
+
+<script>
+  url = "{{ url_for('auth.mark_attendance', id=current_class.class_id) }}"
+  button = document.getElementById("attend_class");
+  button.addEventListener('click', e => {
+    fetch(url)
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Network Error: Attendance mark did not succeed');
+      }
+      else {
+        return response.json()
+      }
+    })
+    .then(responseJson => {
+      if (responseJson.already_marked) {
+        alert('Your attendance was already logged')
+      }
+      else if (responseJson.success) {
+        alert('Success: Attendance Marked')
+      }
+      else {
+        alert('Error marking attendance. Are you enrolled?')
+      }
+    })
+    .catch(error => {
+      console.log(`Something went wrong with fetch: ${error}`)
+    })
+  })
+</script>
 {% endblock body %}
